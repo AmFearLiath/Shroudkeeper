@@ -14,6 +14,7 @@ Diese Wiki erklärt alle Kernbereiche von Shroudkeeper.
    - Konfigurator
 3. [Transfers](Transfers-DE.md)
 4. [Backups](Backups-DE.md)
+   - Wiederherstellung nach Singleplayer/Multiplayer
 5. [Automationen](Automation-DE.md)
 6. [Einstellungen](Settings-DE.md)
 

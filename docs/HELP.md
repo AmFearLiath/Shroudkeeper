@@ -40,6 +40,7 @@ Typische Einsatzfälle:
 - Erstellung lokaler Backups
 - Optionale ZIP-Komprimierung
 - Verwaltung vorhandener Sicherungen
+- Wiederherstellung aus Backup nach Singleplayer oder Multiplayer
 
 #### Automationen
 - Zeitgesteuerte Ausführung von Jobs
@@ -146,6 +147,16 @@ Empfohlener Ablauf:
 1. Backup erstellen
 2. Integrität grob prüfen (Dateien vorhanden, Größe plausibel)
 3. Erst danach Transfer/Rollback/Restore ausführen
+
+Restore-Ablauf in der UI:
+1. In der Backup-Liste bei einem Eintrag **Wiederherstellen** wählen
+2. Zieltyp auswählen (**Singleplayer** oder **Multiplayer**)
+3. Ziel-Slot (Singleplayer) oder Ziel-Profil (Multiplayer) festlegen
+4. Sicherheitsdialog bestätigen
+
+Sicherheitsprüfungen:
+- Singleplayer-Restore wird blockiert, wenn Enshrouded läuft
+- Bei Multiplayer-Restore wird darauf hingewiesen, dass der Zielserver gestoppt sein soll
 
 Wenn ein Fehler auftritt:
 - Keine weiteren Schreibvorgänge starten
@@ -269,6 +280,7 @@ Typical use cases:
 - Create local backups
 - Optional ZIP compression
 - Manage existing backup entries
+- Restore backup data to singleplayer or multiplayer targets
 
 #### Automations
 - Schedule recurring jobs
@@ -375,6 +387,16 @@ Recommended sequence:
 1. Create backup
 2. Verify basic integrity (files exist, size looks plausible)
 3. Execute transfer/rollback/restore only afterwards
+
+Restore flow in UI:
+1. In backup list, click **Restore** on an entry
+2. Select target type (**Singleplayer** or **Multiplayer**)
+3. Choose target slot (singleplayer) or target profile (multiplayer)
+4. Confirm safety dialog
+
+Safety checks:
+- Singleplayer restore is blocked while Enshrouded is running
+- Multiplayer restore shows a warning to stop the target server before writing
 
 If an error occurs:
 - Do not continue with additional writes

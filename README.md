@@ -6,6 +6,8 @@
 
 Desktop-Tool zur Verwaltung, Sicherung, Übertragung und Automatisierung von Enshrouded-Spielständen.
 
+Aktuelle Version: **1.1.0**
+
 ## Hilfe / Help
 
 - Ausführliche zweisprachige Hilfe: [docs/HELP.md](docs/HELP.md)
@@ -16,6 +18,7 @@ Desktop-Tool zur Verwaltung, Sicherung, Übertragung und Automatisierung von Ens
 - Multiplayer-Profile (FTP/FTPS/SFTP) verwalten
 - Transfers zwischen Singleplayer und Multiplayer durchführen
 - Backups erstellen und verwalten
+- Spielstände aus Backups nach Singleplayer oder Multiplayer wiederherstellen
 - Cron-basierte Automationen für Server-Backups/Deployments
 - Mehrsprachige Oberfläche (u. a. DE, EN, RU, FR, IT, ES, PT, PL, BG, CS, TR, ZH, JA, VI)
 - Windows-Distribution als ausführbare Datei (PyInstaller)

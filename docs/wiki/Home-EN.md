@@ -14,6 +14,7 @@ This wiki covers all core areas of Shroudkeeper.
    - Configurator
 3. [Transfers](Transfers-EN.md)
 4. [Backups](Backups-EN.md)
+   - Restore to singleplayer/multiplayer
 5. [Automations](Automation-EN.md)
 6. [Settings](Settings-EN.md)
 

@@ -1,9 +1,12 @@
 ﻿from __future__ import annotations
 
+import json
 import logging
 from pathlib import Path
 import shutil
 import sqlite3
+import tempfile
+import zipfile
 
 from PySide6.QtCore import Qt, QThread, QUrl
 from PySide6.QtGui import QDesktopServices
@@ -30,6 +33,7 @@ from PySide6.QtWidgets import (
 )
 
 from core.backups.backup_index import list_backups
+from core.backups.backup_service import SERVER_WORLD_HEX
 from core.backups.models import BackupEntry, BackupResult, BackupType
 from core.backups.server_backup_worker import ServerBackupWorker
 from core.backups.singleplayer_backup_worker import SingleplayerBackupWorker
@@ -39,8 +43,13 @@ from core.profiles.models import Profile
 from core.saves.models import SaveScanResult, SaveSlot
 from core.saves.scan_worker import SaveScanWorker
 from core.saves.scanner_service import SaveScannerService
+from core.system.process_check import can_write_singleplayer_files
+from core.transfers.execute_remote import join_remote
+from core.transfers.transfer_models import TransferDirection, TransferPlan, TransferResult
+from core.transfers.transfer_worker import TransferWorker
 from i18n.i18n import get_i18n, tr
 from storage.repositories import ProfileRepository
+from ui.widgets.backup_restore_dialog import BackupRestoreDialog
 from ui.widgets.password_dialog import PasswordDialog
 
 
@@ -59,7 +68,9 @@ class BackupsView(QWidget):
         self._slots_by_number: dict[int, SaveSlot] = {}
 
         self._backup_thread: QThread | None = None
-        self._backup_worker: SingleplayerBackupWorker | ServerBackupWorker | None = None
+        self._backup_worker: SingleplayerBackupWorker | ServerBackupWorker | TransferWorker | None = None
+        self._restore_temp_dir: Path | None = None
+        self._restore_target_label: str = ""
 
         self._backup_entries: list[BackupEntry] = []
         self._profiles: dict[int, Profile] = {}
@@ -521,6 +532,8 @@ class BackupsView(QWidget):
         self._backup_thread = None
         self._backup_worker = None
 
+        self._cleanup_restore_temp_dir()
+
         if self._retry_server_requested and self._running_server_profile is not None and self._retry_server_password:
             profile = self._running_server_profile
             password = self._retry_server_password
@@ -678,6 +691,14 @@ class BackupsView(QWidget):
             )
             actions_layout.addWidget(delete_button)
 
+            restore_button = QPushButton(tr("backups.action.restore"))
+            restore_button.setObjectName("backupRestoreButton")
+            restore_button.setMinimumWidth(90)
+            restore_button.clicked.connect(
+                lambda _checked=False, backup_entry=entry: self._start_restore_for_entry(backup_entry)
+            )
+            actions_layout.addWidget(restore_button)
+
             actions_layout.addStretch(1)
             self._backups_table.setCellWidget(row, 5, actions_widget)
 
@@ -713,6 +734,360 @@ class BackupsView(QWidget):
 
         self._refresh_backup_list()
 
+    def _start_restore_for_entry(self, entry: BackupEntry) -> None:
+        if self._backup_thread is not None:
+            return
+
+        slot_options = self._build_restore_slot_options()
+        profile_options = self._build_restore_profile_options()
+
+        if len(slot_options) == 0 and len(profile_options) == 0:
+            QMessageBox.warning(self, tr("backups.title"), tr("backups.restore.error.no_selection"))
+            return
+
+        dialog = BackupRestoreDialog(slot_options=slot_options, profile_options=profile_options, parent=self)
+        if dialog.exec() != BackupRestoreDialog.DialogCode.Accepted:
+            return
+
+        target = dialog.selected_target()
+        slot_number = dialog.selected_slot()
+        selected_profile_id = dialog.selected_profile_id()
+
+        if target == BackupRestoreDialog.TARGET_SINGLEPLAYER:
+            if slot_number is None:
+                QMessageBox.warning(self, tr("backups.title"), tr("backups.restore.error.no_target_slot"))
+                return
+
+            slot = self._slots_by_number.get(slot_number)
+            if slot is None:
+                QMessageBox.warning(self, tr("backups.title"), tr("backups.restore.error.no_target_slot"))
+                return
+
+            if not can_write_singleplayer_files():
+                QMessageBox.critical(self, tr("backups.error.game_running.title"), tr("backups.error.game_running.text"))
+                return
+
+            confirm = QMessageBox.question(
+                self,
+                tr("backups.restore.confirm.title"),
+                tr(
+                    "backups.restore.confirm.sp",
+                    backup=entry.display_title,
+                    slot=slot.slot_number,
+                    name=slot.display_name,
+                ),
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if confirm != QMessageBox.StandardButton.Yes:
+                return
+
+            self._start_restore_job(entry=entry, target=target, slot=slot, profile=None)
+            return
+
+        if not isinstance(selected_profile_id, int):
+            QMessageBox.warning(self, tr("backups.title"), tr("backups.restore.error.no_target_profile"))
+            return
+
+        profile = self._profiles.get(selected_profile_id)
+        if profile is None:
+            QMessageBox.warning(self, tr("backups.title"), tr("backups.restore.error.no_target_profile"))
+            return
+
+        confirm = QMessageBox.question(
+            self,
+            tr("backups.restore.confirm.title"),
+            tr("backups.restore.confirm.mp", backup=entry.display_title, profile=profile.name),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if confirm != QMessageBox.StandardButton.Yes:
+            return
+
+        self._start_restore_job(entry=entry, target=target, slot=None, profile=profile)
+
+    def _start_restore_job(
+        self,
+        entry: BackupEntry,
+        target: str,
+        slot: SaveSlot | None,
+        profile: Profile | None,
+    ) -> None:
+        if self._backup_thread is not None:
+            return
+
+        try:
+            if target == BackupRestoreDialog.TARGET_SINGLEPLAYER:
+                if slot is None:
+                    raise RuntimeError(tr("backups.restore.error.no_target_slot"))
+                plan, temp_dir, target_label = self._build_restore_plan_for_singleplayer(entry, slot)
+                password = None
+                profile_for_worker = None
+            else:
+                if profile is None or profile.id is None:
+                    raise RuntimeError(tr("backups.restore.error.no_target_profile"))
+                plan, temp_dir, target_label = self._build_restore_plan_for_server(entry, profile)
+                password = self._resolve_profile_password(profile)
+                if password is None or password.strip() == "":
+                    raise RuntimeError(tr("backups.error.password_required"))
+                profile_for_worker = profile
+        except Exception as error:
+            QMessageBox.critical(self, tr("common.error"), str(error))
+            return
+
+        self._restore_temp_dir = temp_dir
+        self._restore_target_label = target_label
+
+        self._set_job_ui_state(True)
+        self._progress_bar.setValue(0)
+        self._status_label.setText(tr("backups.restore.progress.preparing"))
+
+        thread = QThread(self)
+        worker = TransferWorker(plan=plan, logger=self._logger, profile=profile_for_worker, password=password)
+        worker.moveToThread(thread)
+
+        thread.started.connect(worker.run)
+        worker.progress.connect(self._on_backup_progress)
+        worker.success.connect(self._on_restore_success)
+        worker.error.connect(self._on_restore_error)
+        worker.success.connect(thread.quit)
+        worker.error.connect(thread.quit)
+        thread.finished.connect(worker.deleteLater)
+        thread.finished.connect(thread.deleteLater)
+        thread.finished.connect(self._on_backup_thread_closed)
+
+        self._backup_thread = thread
+        self._backup_worker = worker
+
+        thread.start()
+
+    def _build_restore_slot_options(self) -> list[tuple[int, str]]:
+        options: list[tuple[int, str]] = []
+        for slot_number in sorted(self._slots_by_number.keys()):
+            slot = self._slots_by_number[slot_number]
+            options.append((slot_number, tr("backups.slot_item", slot=slot_number, name=slot.display_name)))
+        return options
+
+    def _build_restore_profile_options(self) -> list[tuple[int, str]]:
+        options: list[tuple[int, str]] = []
+        for profile_id, profile in sorted(self._profiles.items(), key=lambda item: item[1].name.lower()):
+            options.append((profile_id, profile.name))
+        return options
+
+    def _build_restore_plan_for_singleplayer(self, entry: BackupEntry, slot: SaveSlot) -> tuple[TransferPlan, Path | None, str]:
+        source_root, source_world_hex, latest_roll, temp_dir = self._prepare_restore_source(entry, preferred_slot=slot.slot_number)
+        files = self._build_restore_file_mappings(source_root, source_world_hex, slot.world_id_hex)
+
+        if len(files) == 0:
+            raise RuntimeError(tr("backups.restore.error.no_restore_files"))
+
+        plan = TransferPlan(
+            direction=TransferDirection.SP_TO_SP,
+            source_desc=entry.display_title,
+            target_desc=f"slot-{slot.slot_number}",
+            source_world_hex=source_world_hex,
+            target_world_hex=slot.world_id_hex,
+            source_root=source_root,
+            target_root=slot.root_dir,
+            roll_index=latest_roll,
+            files=files,
+            index_target_path=slot.index_path,
+        )
+        target_label = tr("backups.slot_item", slot=slot.slot_number, name=slot.display_name)
+        return plan, temp_dir, target_label
+
+    def _build_restore_plan_for_server(self, entry: BackupEntry, profile: Profile) -> tuple[TransferPlan, Path | None, str]:
+        source_root, source_world_hex, latest_roll, temp_dir = self._prepare_restore_source(entry, preferred_slot=None)
+        files = self._build_restore_file_mappings(source_root, source_world_hex, SERVER_WORLD_HEX)
+
+        if len(files) == 0:
+            raise RuntimeError(tr("backups.restore.error.no_restore_files"))
+
+        remote_root = profile.remote_path
+        plan = TransferPlan(
+            direction=TransferDirection.SP_TO_SERVER,
+            source_desc=entry.display_title,
+            target_desc=profile.name,
+            source_world_hex=source_world_hex,
+            target_world_hex=SERVER_WORLD_HEX,
+            source_root=source_root,
+            target_root=remote_root,
+            roll_index=latest_roll,
+            files=files,
+            index_target_path=join_remote(remote_root, f"{SERVER_WORLD_HEX}-index"),
+        )
+        return plan, temp_dir, profile.name
+
+    def _prepare_restore_source(self, entry: BackupEntry, preferred_slot: int | None) -> tuple[Path, str, int, Path | None]:
+        run_root = entry.path
+        temp_dir: Path | None = None
+
+        if entry.is_zipped:
+            temp_dir = Path(tempfile.mkdtemp(prefix="shroudkeeper-restore-"))
+            with zipfile.ZipFile(entry.path, "r") as archive:
+                archive.extractall(temp_dir)
+            run_root = temp_dir
+
+        if not run_root.exists() or not run_root.is_dir():
+            raise RuntimeError(tr("backups.restore.error.invalid_backup"))
+
+        if entry.type == BackupType.SERVER:
+            source_dir = run_root / SERVER_WORLD_HEX
+            if not source_dir.exists() or not source_dir.is_dir():
+                raise RuntimeError(tr("backups.restore.error.invalid_backup"))
+
+            source_world_hex = SERVER_WORLD_HEX
+            latest_roll = self._resolve_latest_roll(source_dir, source_world_hex)
+            return source_dir, source_world_hex, latest_roll, temp_dir
+
+        source_dir = self._pick_singleplayer_source_slot_dir(run_root, preferred_slot)
+        source_world_hex = self._extract_world_hex_from_slot_dir(source_dir)
+        latest_roll = self._resolve_latest_roll(source_dir, source_world_hex)
+        return source_dir, source_world_hex, latest_roll, temp_dir
+
+    def _pick_singleplayer_source_slot_dir(self, run_root: Path, preferred_slot: int | None) -> Path:
+        candidates = [path for path in run_root.iterdir() if path.is_dir() and path.name.lower().startswith("slot-")]
+        if len(candidates) == 0:
+            raise RuntimeError(tr("backups.restore.error.invalid_backup"))
+
+        if preferred_slot is not None:
+            prefix = f"slot-{preferred_slot}__"
+            for candidate in candidates:
+                if candidate.name.startswith(prefix):
+                    return candidate
+
+        candidates.sort(key=lambda item: item.name.lower())
+        return candidates[0]
+
+    def _extract_world_hex_from_slot_dir(self, slot_dir: Path) -> str:
+        name_parts = slot_dir.name.split("__")
+        if len(name_parts) >= 2 and name_parts[1].strip() != "":
+            return name_parts[1].strip()
+
+        for file_path in slot_dir.iterdir():
+            if not file_path.is_file():
+                continue
+            name = file_path.name
+            if name.endswith("-index"):
+                return name[:-6]
+            if "-" in name:
+                left, right = name.rsplit("-", 1)
+                if right.isdigit():
+                    return left
+            return name
+
+        raise RuntimeError(tr("backups.restore.error.invalid_backup"))
+
+    def _resolve_latest_roll(self, source_dir: Path, source_world_hex: str) -> int:
+        index_path = source_dir / f"{source_world_hex}-index"
+        if index_path.exists() and index_path.is_file():
+            try:
+                payload = json.loads(index_path.read_text(encoding="utf-8"))
+                latest = payload.get("latest") if isinstance(payload, dict) else None
+                if isinstance(latest, int):
+                    return latest
+            except Exception:
+                pass
+
+        rolls: list[int] = []
+        for path in source_dir.iterdir():
+            if not path.is_file():
+                continue
+
+            name = path.name
+            if name == source_world_hex:
+                rolls.append(0)
+                continue
+
+            prefix = f"{source_world_hex}-"
+            if name.startswith(prefix):
+                suffix = name[len(prefix):]
+                if suffix.isdigit():
+                    rolls.append(int(suffix))
+
+        if len(rolls) == 0:
+            raise RuntimeError(tr("backups.restore.error.no_restore_files"))
+        return max(rolls)
+
+    def _build_restore_file_mappings(self, source_dir: Path, source_world_hex: str, target_world_hex: str) -> list[tuple[str, str]]:
+        mappings: list[tuple[str, str]] = []
+        prefix = f"{source_world_hex}-"
+
+        for path in sorted(source_dir.iterdir(), key=lambda item: item.name.lower()):
+            if not path.is_file():
+                continue
+
+            src_name = path.name
+            if src_name == f"{source_world_hex}-index":
+                continue
+
+            if src_name == source_world_hex:
+                mappings.append((src_name, target_world_hex))
+                continue
+
+            if src_name.startswith(prefix):
+                suffix = src_name[len(prefix):]
+                if suffix.isdigit():
+                    mappings.append((src_name, f"{target_world_hex}-{suffix}"))
+
+        return mappings
+
+    def _resolve_profile_password(self, profile: Profile) -> str | None:
+        if profile.id is None:
+            return None
+
+        password = self._credential_service.get_password(profile.id, profile.username)
+        if isinstance(password, str) and password.strip() != "":
+            return password
+
+        dialog = PasswordDialog(profile_name=profile.name, parent=self)
+        if dialog.exec() != PasswordDialog.DialogCode.Accepted:
+            return None
+
+        password = dialog.password().strip()
+        if password == "":
+            return None
+
+        if dialog.remember_password():
+            self._credential_service.set_password(profile.id, profile.username, password)
+
+        return password
+
+    def _on_restore_success(self, result: object) -> None:
+        if not isinstance(result, TransferResult):
+            return
+
+        self._status_label.setText(tr("backups.status.finished"))
+        QMessageBox.information(
+            self,
+            tr("backups.restore.success.title"),
+            tr(
+                "backups.restore.success.text",
+                files=result.files_copied,
+                bytes=result.bytes_copied,
+                target=self._restore_target_label,
+            ),
+        )
+        self._refresh_backup_list()
+
+    def _on_restore_error(self, message: str) -> None:
+        self._status_label.setText(tr("backups.status.failed", error=message))
+        if message == tr("backups.error.game_running.text"):
+            QMessageBox.critical(self, tr("backups.error.game_running.title"), message)
+            return
+        QMessageBox.critical(self, tr("common.error"), tr("backups.status.failed", error=message))
+
+    def _cleanup_restore_temp_dir(self) -> None:
+        temp_dir = self._restore_temp_dir
+        self._restore_temp_dir = None
+        if temp_dir is None:
+            return
+
+        try:
+            shutil.rmtree(temp_dir)
+        except Exception:
+            self._logger.exception("Could not remove restore temp directory: %s", temp_dir)
+
     def _set_job_ui_state(self, running: bool) -> None:
         self._set_status_card_visible(running)
         controls_enabled = not running
@@ -728,6 +1103,7 @@ class BackupsView(QWidget):
         self._create_tabs.setEnabled(controls_enabled)
         self._list_refresh_button.setEnabled(controls_enabled)
         self._slots_list.setEnabled(controls_enabled)
+        self._backups_table.setEnabled(controls_enabled)
 
     def _set_status_card_visible(self, visible: bool) -> None:
         self._status_card.setVisible(visible)
