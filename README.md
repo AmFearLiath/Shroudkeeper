@@ -10,7 +10,7 @@ Current version: **1.1.0**
 
 ## Help
 
-- Detailed bilingual help: [docs/HELP.md](docs/HELP.md)
+- Detailed bilingual help: [docs/HELP.md](docs/HELP.md) or [Wiki](https://github.com/AmFearLiath/Shroudkeeper/wiki)
 
 ## Features
 
