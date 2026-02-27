@@ -127,12 +127,12 @@ $ReleaseNotesTemplate = @"
 ## Shroudkeeper v$Version
 
 ### Download
-- **Windows 64-bit**: `$ZipName`
-- **SHA256**: `$Hash`
+- **Windows 64-bit**: $ZipName
+- **SHA256**: $Hash
 
 ### Installation
 1. ZIP-Datei entpacken
-2. `Shroudkeeper.exe` starten
+2. Shroudkeeper.exe starten
 
 ### Änderungen
 - 
