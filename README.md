@@ -4,26 +4,26 @@
 	<img src="shroudkeeper/assets/images/logo.png" alt="Shroudkeeper Logo" width="640">
 </p>
 
-Desktop-Tool zur Verwaltung, Sicherung, Übertragung und Automatisierung von Enshrouded-Spielständen.
+Desktop tool for managing, backing up, transferring, and automating Enshrouded savegames.
 
-Aktuelle Version: **1.1.0**
+Current version: **1.1.0**
 
-## Hilfe / Help
+## Help
 
-- Ausführliche zweisprachige Hilfe: [docs/HELP.md](docs/HELP.md)
+- Detailed bilingual help: [docs/HELP.md](docs/HELP.md)
 
 ## Features
 
-- Singleplayer-Slots scannen und verwalten
-- Multiplayer-Profile (FTP/FTPS/SFTP) verwalten
-- Transfers zwischen Singleplayer und Multiplayer durchführen
-- Backups erstellen und verwalten
-- Spielstände aus Backups nach Singleplayer oder Multiplayer wiederherstellen
-- Cron-basierte Automationen für Server-Backups/Deployments
-- Mehrsprachige Oberfläche (u. a. DE, EN, RU, FR, IT, ES, PT, PL, BG, CS, TR, ZH, JA, VI)
-- Windows-Distribution als ausführbare Datei (PyInstaller)
+- Scan and manage singleplayer slots
+- Manage multiplayer profiles (FTP/FTPS/SFTP)
+- Transfer savegames between singleplayer and multiplayer
+- Create and manage backups
+- Restore savegames from backups to singleplayer or multiplayer
+- Cron-based automations for server backups/deployments
+- Multilingual UI (including DE, EN, RU, FR, IT, ES, PT, PL, BG, CS, TR, ZH, JA, VI)
+- Windows distribution as an executable build (PyInstaller)
 
-## Projektstruktur
+## Project Structure
 
 ```text
 shroudkeeper/
@@ -35,7 +35,7 @@ shroudkeeper/
 	ui/
 ```
 
-## Voraussetzungen (Entwicklung)
+## Requirements (Development)
 
 - Windows 10/11
 - Python 3.11+
@@ -53,7 +53,7 @@ python app.py
 
 ## Build (Windows)
 
-Standard OneDir-Build:
+Standard OneDir build:
 
 ```powershell
 cd shroudkeeper
@@ -63,31 +63,31 @@ pyinstaller --noconfirm Shroudkeeper.spec
 Output:
 
 - `shroudkeeper/dist/Shroudkeeper/Shroudkeeper.exe`
-- plus benötigter Runtime-Ordner (`_internal`)
+- plus required runtime folder (`_internal`)
 
-## Konfiguration & Daten
+## Configuration & Data
 
-- Nutzerdaten werden unter `%APPDATA%/Shroudkeeper` gespeichert.
-- Es werden keine Nutzerdaten im Installationsordner persistiert.
+- User data is stored under `%APPDATA%/Shroudkeeper`.
+- No persistent user data is written to the installation directory.
 
-## Sicherheitshinweise
+## Security Notes
 
-- Vor Schreiboperationen (Transfer/Rollback/Restore) immer Backup erstellen.
-- Beim Schreiben in Multiplayer-Dateien den Zielserver vorher stoppen.
-- Bei lokalen Schreiboperationen Enshrouded schließen.
+- Always create a backup before write operations (transfer/rollback/restore).
+- Stop the target server before writing multiplayer files.
+- Close Enshrouded before local write operations.
 
-## Lokalisierung
+## Localization
 
-- Sprachdateien liegen in `shroudkeeper/i18n/translations/*.json`.
-- Neue Texte werden über i18n-Keys gepflegt.
+- Translation files are located in `shroudkeeper/i18n/translations/*.json`.
+- New texts are maintained via i18n keys.
 
-## Lizenz
+## License
 
-Dieses Projekt steht unter der MIT-Lizenz. Details inklusive Third-Party-Liste stehen in der Datei `LICENSE`.
+This project is licensed under the MIT License. Details, including the third-party list, are provided in `LICENSE`.
 
 ## Third-Party
 
-Verwendete Hauptbibliotheken:
+Main libraries used:
 
 - PySide6
 - keyring
@@ -98,7 +98,7 @@ Verwendete Hauptbibliotheken:
 - croniter
 - psutil
 
-## Haftungsausschluss
+## Disclaimer
 
-Shroudkeeper ist ein Community-Projekt und steht in keiner offiziellen Verbindung zu Keen Games oder Enshrouded.
+Shroudkeeper is a community project and is not officially affiliated with Keen Games or Enshrouded.
 
