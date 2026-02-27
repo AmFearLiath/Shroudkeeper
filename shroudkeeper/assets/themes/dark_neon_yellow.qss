@@ -1,0 +1,185 @@
+QWidget {
+    background-color: {{bg0}};
+    color: {{text}};
+    font-size: 13px;
+}
+
+QMainWindow,
+QDialog#slotDetailsDialog,
+QDialog#profileDialog,
+QDialog#passwordDialog {
+    background-color: {{bg0}};
+}
+
+QPushButton {
+    background-color: {{bg2}};
+    border: 1px solid {{border}};
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+
+QPushButton#primaryButton {
+    font-weight: 600;
+    border: 1px solid {{primary}};
+    background-color: {{primary}};
+    color: {{selectionText}};
+}
+
+QPushButton#primaryButton:hover {
+    background-color: {{primaryHover}};
+    border-color: {{primaryHover}};
+}
+
+QPushButton#dangerButton {
+    font-weight: 600;
+}
+
+QPushButton#warningsBadge {
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-weight: 600;
+}
+
+QPushButton#warningsBadge[alert="true"] {
+    background-color: {{danger}};
+    border: 1px solid {{danger}};
+    color: {{selectionText}};
+}
+
+QPushButton#warningsBadge[alert="false"] {
+    background-color: {{bg2}};
+    border: 1px solid {{border}};
+}
+
+QPushButton#smallToolButton {
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+QPushButton:hover {
+    background-color: {{bg1}};
+}
+
+QPushButton:checked {
+    background-color: {{selectionBg}};
+    border: 1px solid {{primary}};
+}
+
+QComboBox,
+QTextEdit,
+QLineEdit,
+QListWidget,
+QTableWidget {
+    background-color: {{bg2}};
+    border: 1px solid {{border}};
+    border-radius: 6px;
+    padding: 6px;
+}
+
+QGroupBox {
+    border: 1px solid {{border}};
+    border-radius: 6px;
+    margin-top: 8px;
+    padding-top: 8px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 8px;
+    padding: 0 4px;
+}
+
+QWidget#card,
+QFrame#card,
+QFrame#placeholderPanel {
+    background-color: {{bg1}};
+    border: 1px solid {{border}};
+    border-radius: 10px;
+}
+
+QWidget#slotCard {
+    background-color: {{bg2}};
+    border: 1px solid {{border}};
+    border-radius: 10px;
+    padding: 2px;
+}
+
+QWidget#slotCard:hover {
+    background-color: {{bg1}};
+}
+
+QWidget#slotCard[selected="true"] {
+    border: 1px solid {{primary}};
+    background-color: {{selectionBg}};
+}
+
+QLabel#viewHeadline {
+    font-size: 26px;
+    font-weight: 600;
+}
+
+QLabel#cardTitle,
+QLabel#panelTitle {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+QLabel#slotCardTitle {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+QWidget#slotCardBadgeRow {
+    background-color: transparent;
+}
+
+QLabel#badgeLabel,
+QLabel#backupTypeBadgeSP,
+QLabel#backupTypeBadgeSRV,
+QLabel#backupFormatBadge {
+    border: 1px solid {{border}};
+    border-radius: 6px;
+    padding: 3px 6px;
+    background-color: {{bg2}};
+    font-size: 11px;
+}
+
+QLabel#infoBar {
+    border: 1px solid {{border}};
+    border-radius: 6px;
+    background-color: {{bg2}};
+    padding: 6px 10px;
+    color: {{textMuted}};
+}
+
+QHeaderView::section {
+    background-color: {{tableHeaderBg}};
+    color: {{text}};
+    border: 1px solid {{border}};
+    padding: 6px;
+    font-weight: 600;
+}
+
+QTableWidget {
+    gridline-color: {{border}};
+    alternate-background-color: {{tableRowAlt}};
+}
+
+QTableWidget#slotsTable,
+QTableWidget#profilesTable {
+    padding: 0;
+}
+
+QTableWidget#slotsTable::item,
+QTableWidget#profilesTable::item {
+    padding: 4px 6px;
+}
+
+QPushButton#detailsButton,
+QPushButton#openFolderButton,
+QPushButton#copyIdButton,
+QPushButton#smallToolButton {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+}

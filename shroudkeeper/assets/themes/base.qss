@@ -1,0 +1,375 @@
+QWidget {
+    background: {{bg0}};
+    color: {{text}};
+    font-size: 13px;
+}
+
+QWidget#AppRoot {
+    background: transparent;
+}
+
+QWidget#AppShell,
+QWidget#AppContent,
+QStackedWidget#ContentStack,
+QStackedWidget#ContentStack QWidget,
+QWidget#ContentView {
+    background: transparent;
+}
+
+QWidget#ContentView QWidget {
+    background: transparent;
+}
+
+QWidget#Sidebar {
+    background: {{bg1}};
+    border: 1px solid {{border}};
+    border-radius: 10px;
+}
+
+QWidget#Content {
+    background: transparent;
+}
+
+QWidget#PageHeader {
+    background: transparent;
+}
+
+QWidget#WindowTitleBar {
+    background: transparent;
+}
+
+QLabel#WindowTitle {
+    color: {{textMuted}};
+    font-size: 12px;
+    padding-left: 6px;
+}
+
+QPushButton#TitleBarButton,
+QPushButton#TitleBarCloseButton {
+    min-width: 24px;
+    min-height: 24px;
+    padding: 2px;
+}
+
+QLabel#H1, QLabel#viewHeadline, QLabel#PageTitle {
+    font-size: 22px;
+    font-weight: 700;
+    color: {{text}};
+}
+
+QLabel#H2, QLabel#cardTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: {{text}};
+}
+
+QLabel#Caption {
+    font-size: 11px;
+    color: {{textMuted}};
+}
+
+QLabel#infoBar {
+    color: {{textMuted}};
+}
+
+QFrame#EVCard,
+QWidget#card,
+QFrame#card,
+QFrame#backupCreateCard,
+QFrame#backupStatusCard,
+QFrame#backupListCard {
+    background: {{bg1}};
+    border: 1px solid {{border}};
+    border-radius: 12px;
+}
+
+QFrame#EVCard[variant="subtle"] {
+    background: {{bg2}};
+}
+
+QFrame#EVCard[variant="outline"] {
+    background: transparent;
+}
+
+QFrame#EVCard[activeSource="singleplayer"],
+QFrame#EVCard[activeSource="server"],
+QFrame#EVCard[activeTarget="singleplayer"],
+QFrame#EVCard[activeTarget="server"] {
+    border-color: {{primary}};
+}
+
+QPushButton {
+    background: {{bg2}};
+    border: 1px solid {{border}};
+    color: {{text}};
+    border-radius: 8px;
+    padding: 7px 12px;
+}
+
+QPushButton:hover {
+    border-color: {{primaryHover}};
+}
+
+QPushButton:pressed {
+    background: {{bg1}};
+}
+
+QPushButton[variant="primary"] {
+    background: {{primary}};
+    border-color: {{primary}};
+    color: {{selectionText}};
+}
+
+QPushButton[fullWidth="true"] {
+    min-height: 36px;
+}
+
+QPushButton[variant="primary"]:hover {
+    background: {{primaryHover}};
+    border-color: {{primaryHover}};
+}
+
+QPushButton[variant="primary"]:pressed {
+    background: {{primaryActive}};
+    border-color: {{primaryActive}};
+}
+
+QPushButton[variant="secondary"] {
+    background: {{bg2}};
+    border-color: {{border}};
+}
+
+QPushButton[variant="ghost"] {
+    background: transparent;
+    border-color: transparent;
+    color: {{textMuted}};
+}
+
+QPushButton[variant="danger"] {
+    background: {{danger}};
+    border-color: {{danger}};
+    color: {{selectionText}};
+}
+
+QPushButton#primaryButton {
+    background: {{primary}};
+    border-color: {{primary}};
+    color: {{selectionText}};
+}
+
+QPushButton#dangerButton,
+QPushButton#backupDeleteButton {
+    background: {{danger}};
+    border-color: {{danger}};
+    color: {{selectionText}};
+}
+
+QPushButton[nav="true"] {
+    text-align: left;
+    padding: 8px 10px;
+}
+
+QPushButton#NavButton {
+    text-align: left;
+    padding: 8px 10px;
+}
+
+QPushButton[nav="true"][active="true"] {
+    background: {{primary}};
+    border-color: {{primary}};
+    color: {{selectionText}};
+}
+
+QPushButton#NavButton[active="true"] {
+    background: {{primary}};
+    border-color: {{primary}};
+    color: {{selectionText}};
+}
+
+QLineEdit,
+QComboBox,
+QTableWidget,
+QListWidget,
+QPlainTextEdit {
+    background: {{bg2}};
+    border: 1px solid {{border}};
+    border-radius: 8px;
+    color: {{text}};
+    selection-background-color: {{selectionBg}};
+    selection-color: {{selectionText}};
+    padding: 5px;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 18px;
+}
+
+QTableWidget#EVTable,
+QTableWidget#slotsTable,
+QTableWidget#profilesTable,
+QTableWidget#serverRollsTable,
+QTableWidget#backupsTable {
+    gridline-color: {{border}};
+}
+
+QHeaderView::section {
+    background: {{tableHeaderBg}};
+    color: {{text}};
+    border: 1px solid {{border}};
+    border-left: none;
+    padding: 6px;
+    font-weight: 600;
+}
+
+QHeaderView::section:first {
+    border-left: 1px solid {{border}};
+}
+
+QTableWidget {
+    alternate-background-color: {{tableRowAlt}};
+}
+
+QTabWidget::pane {
+    border: 1px solid {{border}};
+    border-radius: 10px;
+    top: -1px;
+}
+
+QTabBar::tab {
+    background: {{bg2}};
+    border: 1px solid {{border}};
+    padding: 7px 12px;
+    margin-right: 4px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+QTabBar::tab:selected {
+    background: {{bg1}};
+    border-bottom-color: {{bg1}};
+}
+
+QCheckBox {
+    spacing: 8px;
+    color: {{text}};
+}
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid {{border}};
+    border-radius: 4px;
+    background: {{bg2}};
+}
+
+QCheckBox::indicator:checked {
+    background: {{primary}};
+    border-color: {{primary}};
+}
+
+QScrollBar:vertical {
+    background: {{bg1}};
+    width: 12px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical {
+    background: {{border}};
+    border-radius: 5px;
+    min-height: 24px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical,
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: transparent;
+    height: 0px;
+}
+
+QWidget:focus,
+QPushButton:focus,
+QLineEdit:focus,
+QComboBox:focus,
+QTableWidget:focus,
+QListWidget:focus {
+    outline: 1px solid {{focusRing}};
+}
+
+QLabel#EVBadge {
+    border-radius: 8px;
+    padding: 2px 8px;
+    background: {{bg2}};
+    border: 1px solid {{border}};
+    color: {{text}};
+}
+
+QLabel#EVBadge[size="sm"] {
+    padding: 1px 6px;
+    font-size: 11px;
+}
+
+QLabel#EVBadge[tone="info"] {
+    color: {{primary}};
+    border-color: {{primary}};
+}
+
+QLabel#EVBadge[tone="success"] {
+    color: {{success}};
+    border-color: {{success}};
+}
+
+QLabel#EVBadge[tone="warn"] {
+    color: {{warn}};
+    border-color: {{warn}};
+}
+
+QLabel#EVBadge[tone="danger"] {
+    color: {{danger}};
+    border-color: {{danger}};
+}
+
+QLabel#EVToast {
+    background: {{bg1}};
+    border: 1px solid {{border}};
+    border-radius: 8px;
+    padding: 8px 10px;
+    color: {{text}};
+}
+
+QLabel#EVToast[tone="success"] {
+    border-color: {{success}};
+}
+
+QLabel#EVToast[tone="warn"] {
+    border-color: {{warn}};
+}
+
+QLabel#EVToast[tone="danger"] {
+    border-color: {{danger}};
+}
+
+QWidget[segmented="true"] {
+    border: 1px solid {{border}};
+    border-radius: 10px;
+    background: {{bg2}};
+}
+
+QWidget[segmented="true"] QRadioButton[segment="true"] {
+    padding: 6px 10px;
+    border: 1px solid {{border}};
+    border-radius: 8px;
+    background: {{bg1}};
+}
+
+QWidget[segmented="true"] QRadioButton[segment="true"]::indicator {
+    width: 0px;
+    height: 0px;
+}
+
+QWidget[segmented="true"] QRadioButton[segment="true"][selected="true"] {
+    border-color: {{primary}};
+    background: {{primary}};
+    color: {{selectionText}};
+}

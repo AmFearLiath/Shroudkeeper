@@ -1,0 +1,72 @@
+MIT License
+
+Copyright (c) 2026 AmFearLiath
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Third-Party Dependencies
+========================
+
+This project uses third-party libraries. Their licenses are independent from
+the MIT license of this repository.
+
+The list below reflects the direct runtime dependencies currently configured
+for Shroudkeeper.
+
+- PySide6 6.10.2  
+	License: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only  
+	Project: https://pyside.org
+
+- keyring 25.7.0  
+	License: MIT  
+	Project: https://github.com/jaraco/keyring
+
+- aioftp 0.27.2  
+	License: Apache License 2.0  
+	Project: https://github.com/aio-libs/aioftp
+
+- asyncssh 2.22.0  
+	License: EPL-2.0 OR GPL-2.0-or-later  
+	Project: http://asyncssh.timeheart.net
+
+- zstandard 0.25.0  
+	License: BSD-3-Clause  
+	Project: https://github.com/indygreg/python-zstandard
+
+- APScheduler 3.11.2  
+	License: MIT  
+	Project: https://github.com/agronholm/apscheduler
+
+- croniter 6.0.0  
+	License: MIT  
+	Project: https://github.com/kiorky/croniter
+
+- psutil 7.2.2  
+	License: BSD-3-Clause  
+	Project: https://github.com/giampaolo/psutil
+
+Notes
+-----
+
+1. The licenses above are based on package metadata in the project environment.
+2. When redistributing binaries, ensure all required third-party notices are
+	 included as required by their licenses.
+3. This project is not affiliated with or endorsed by Keen Games.
