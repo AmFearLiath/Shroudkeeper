@@ -14,6 +14,7 @@ shroudkeeper/build/
 shroudkeeper/dist/
 
 backups/
+releases/
 *.zip
 
 *.log
