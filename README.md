@@ -1,6 +1,14 @@
 # Shroudkeeper
 
+<p align="center">
+	<img src="shroudkeeper/assets/images/logo.jpg" alt="Shroudkeeper Logo" width="220">
+</p>
+
 Desktop-Tool zur Verwaltung, Sicherung, Übertragung und Automatisierung von Enshrouded-Spielständen.
+
+## Hilfe / Help
+
+- Ausführliche zweisprachige Hilfe: [docs/HELP.md](docs/HELP.md)
 
 ## Features
 
