@@ -37,6 +37,7 @@ $ReleasesDir = Join-Path $ProjectRoot "releases"
 $ZipName = "Shroudkeeper-v$Version-win64.zip"
 $ZipPath = Join-Path $ReleasesDir $ZipName
 $ChecksumFile = Join-Path $ReleasesDir "Shroudkeeper-v$Version-win64.sha256"
+$ReleaseNotesFile = Join-Path $ReleasesDir "release-notes-v$Version.md"
 
 Write-Host "=== Shroudkeeper Release Builder ===" -ForegroundColor Cyan
 Write-Host "Version: $Version" -ForegroundColor Yellow
@@ -140,6 +141,9 @@ $ReleaseNotesTemplate = @"
 ### Bekannte Probleme
 - 
 "@
+
+$ReleaseNotesTemplate | Out-File -FilePath $ReleaseNotesFile -Encoding utf8
+Write-Host "[OK] Release Notes gespeichert: $ReleaseNotesFile" -ForegroundColor Green
 
 Write-Host "Release Notes Template:" -ForegroundColor Yellow
 Write-Host $ReleaseNotesTemplate -ForegroundColor Gray
